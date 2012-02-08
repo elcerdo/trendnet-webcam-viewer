@@ -15,13 +15,16 @@ class Scrapper : public QWidget
 	public slots:
 		void sendRequest();
 		void readImage();
+		void displayPixmap(QPixmap);
 	protected:
+		void paintEvent(QPaintEvent* event);
 		typedef QList<QString> Urls;
 		Urls urls;
 		
 		State* state;
 		QTimer* timer;
 		QNetworkAccessManager* manager;
+		QPixmap current;
 };
 
 #endif

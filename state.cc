@@ -75,6 +75,11 @@ bool State::updateState()
 		buffer.remove(0,imageLength);
 
 		Q_ASSERT(image.size() == imageLength);
+
+		QPixmap pixmap;
+		pixmap.loadFromData(image,"JPEG");
+		emit gotPixmap(pixmap);
+
 		state = INIT;
 		return true;
 	}

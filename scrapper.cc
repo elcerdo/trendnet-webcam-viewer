@@ -3,6 +3,7 @@
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QDebug>
+#include <QPainter>
 #include <fstream>
 
 Scrapper::Scrapper(QWidget* parent)
@@ -16,6 +17,7 @@ Scrapper::Scrapper(QWidget* parent)
 	manager = new QNetworkAccessManager(this);
 
 	state = new State(this);
+	connect(state,SIGNAL(gotPixmap(QPixmap)),SLOT(displayPixmap(QPixmap)));
 
 	//sendRequest();
 	//timer->start();
@@ -62,7 +64,21 @@ void Scrapper::readImage()
 	state->append(reply->readAll());
 }
 
+void Scrapper::displayPixmap(QPixmap pixmap)
+{
+	qDebug() << "got image" << pixmap.size();
+	current = pixmap;
+	update();
+}
+
 //void Scrapper::gotReply(QNetworkReply* reply)
 //{
 //	qDebug() << "got reply" << reply->url().toString();
 //}
+
+void Scrapper::paintEvent(QPaintEvent* event)
+{
+	qDebug() << "paint event";
+	QPainter painter(this);
+	painter.drawPixmap(rect(),current);
+}

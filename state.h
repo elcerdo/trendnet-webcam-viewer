@@ -2,6 +2,7 @@
 #define __STATE_H__
 
 #include <QObject>
+#include <QPixmap>
 
 class State : public QObject
 {
@@ -9,6 +10,8 @@ class State : public QObject
 	public:
 		State(QObject* parent);
 		void append(QByteArray chunk);
+	signals:
+		void gotPixmap(QPixmap pixmap);
 	protected:
 		enum StateType {INIT,GETTYPE,GETLENGTH,SKIPLINE,GETIMAGE,ERROR};
 		QByteArray buffer;
