@@ -12,14 +12,13 @@ class Scrapper : public QWidget
 	public:
 		Scrapper(QWidget* parent = NULL);
 		void loadUrlFromFile(const QString& filename);
-	public slots:
-		void sendRequest();
-		void displayImage(const QPixmap& image);
+		void populateWebcams(int number);
 	protected:
+		void appendRandomWebcam();
 		void paintEvent(QPaintEvent* event);
 		typedef QVector<QUrl> Urls;
 		Urls urls;
-		
+
 		typedef QList<Webcam*> Webcams;
 		Webcams webcams;
 

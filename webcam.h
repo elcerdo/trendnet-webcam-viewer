@@ -5,6 +5,7 @@
 #include <QNetworkAccessManager>
 #include <QObject>
 #include <QPixmap>
+#include <QTimer>
 
 class Webcam : public QObject
 {
@@ -14,6 +15,7 @@ class Webcam : public QObject
 		int getImageCount() const;
 		QPixmap getLastImage() const;
 		QString getStatus() const;
+		bool isActive();
 	signals:
 		void gotImage(const QPixmap& image);
 	protected slots:
@@ -21,6 +23,7 @@ class Webcam : public QObject
 	protected:
 		const QUrl url;
 		QString indent;
+		bool newImageSinceLastCall;
 		QNetworkReply* reply;
 
 		enum WebcamType {INIT,GETTYPE,GETLENGTH,SKIPLINE,GETIMAGE,ERROR};

@@ -7,6 +7,7 @@
 Webcam::Webcam(QObject* parent, QNetworkAccessManager* manager, const QUrl& url)
 	: QObject(parent), url(url)
 {
+	newImageSinceLastCall = false;
 	indent = "["+url.host()+"]";
 	buffer.clear();
 
@@ -106,8 +107,9 @@ bool Webcam::updateWebcam()
 
 		imageCount++;
 
-		qDebug() << qPrintable(indent) << "got new image buffer_size =" << images.size();
-		emit gotImage(image);
+		newImageSinceLastCall = true;
+		//qDebug() << qPrintable(indent) << "got new image image_count =" << imageCount;
+		//emit gotImage(image);
 
 		state = INIT;
 		return true;
@@ -125,7 +127,7 @@ int Webcam::getImageCount() const
 
 QString Webcam::getStatus() const
 {
-	return indent+" "+imageCount;
+	return QString("%1 %2").arg(indent).arg(imageCount);
 }
 
 QPixmap Webcam::getLastImage() const
@@ -144,3 +146,9 @@ bool Webcam::extractLine(QByteArray& line)
 	return true;
 }
 
+bool Webcam::isActive()
+{
+	bool local = newImageSinceLastCall;
+	newImageSinceLastCall = false;
+	return local;
+}
