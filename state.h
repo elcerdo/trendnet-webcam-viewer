@@ -11,10 +11,14 @@ class State : public QObject
 		State(QObject* parent);
 		void append(QByteArray chunk);
 	signals:
-		void gotPixmap(QPixmap pixmap);
+		void gotImage(const QPixmap& image);
 	protected:
 		enum StateType {INIT,GETTYPE,GETLENGTH,SKIPLINE,GETIMAGE,ERROR};
 		QByteArray buffer;
+
+		int imageCount;
+		typedef QList<QPixmap> Images;
+		Images images;
 
 		bool updateState();
 		bool extractLine(QByteArray& line);

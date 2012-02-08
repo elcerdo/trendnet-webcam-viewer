@@ -17,7 +17,7 @@ Scrapper::Scrapper(QWidget* parent)
 	manager = new QNetworkAccessManager(this);
 
 	state = new State(this);
-	connect(state,SIGNAL(gotPixmap(QPixmap)),SLOT(displayPixmap(QPixmap)));
+	connect(state,SIGNAL(gotImage(const QPixmap&)),SLOT(displayImage(const QPixmap&)));
 
 	//sendRequest();
 	//timer->start();
@@ -64,10 +64,10 @@ void Scrapper::readImage()
 	state->append(reply->readAll());
 }
 
-void Scrapper::displayPixmap(QPixmap pixmap)
+void Scrapper::displayImage(const QPixmap& image)
 {
-	qDebug() << "got image" << pixmap.size();
-	current = pixmap;
+	qDebug() << "got image" << image.size();
+	current = image;
 	update();
 }
 

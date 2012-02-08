@@ -15,7 +15,7 @@ class Scrapper : public QWidget
 	public slots:
 		void sendRequest();
 		void readImage();
-		void displayPixmap(QPixmap);
+		void displayImage(const QPixmap& image);
 	protected:
 		void paintEvent(QPaintEvent* event);
 		typedef QList<QString> Urls;

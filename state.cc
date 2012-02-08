@@ -6,17 +6,21 @@ State::State(QObject* parent)
 	: QObject(parent)
 {
 	state = INIT;
+	imageCount = 0;
+	images.clear();
+	buffer.clear();
+	imageLength = -1;
 }
 
 void State::append(QByteArray chunk)
 {
 	buffer.append(chunk);
-	qDebug() << "buffer size" << buffer.size();
+	//qDebug() << "buffer size" << buffer.size();
 	
 	StateType old_state = state;
 	while (updateState())
 	{
-		qDebug() << old_state << "->" << state;
+		//qDebug() << old_state << "->" << state;
 		old_state = state;
 	}
 }
@@ -69,16 +73,23 @@ bool State::updateState()
 
 	if (state == GETIMAGE) 
 	{
-		if (buffer.size()<imageLength) return false;
+		if (buffer.size() < imageLength) return false;
 
-		QByteArray image = buffer.left(imageLength);
+		QByteArray image_data = buffer.left(imageLength);
 		buffer.remove(0,imageLength);
 
-		Q_ASSERT(image.size() == imageLength);
+		Q_ASSERT(image_data.size() == imageLength);
 
-		QPixmap pixmap;
-		pixmap.loadFromData(image,"JPEG");
-		emit gotPixmap(pixmap);
+		QPixmap image;
+		image.loadFromData(image_data,"JPEG");
+
+		images.push_back(image);
+		while (images.size() > 20)
+			images.pop_front();
+
+		imageCount++;
+
+		emit gotImage(image);
 
 		state = INIT;
 		return true;
