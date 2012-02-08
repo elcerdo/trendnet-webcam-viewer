@@ -16,6 +16,10 @@ class Scrapper : public QWidget
 	protected:
 		void appendRandomWebcam();
 		void paintEvent(QPaintEvent* event);
+		void mousePressEvent(QMouseEvent* event);
+		int mosaik_size;
+		float factor;
+
 		typedef QVector<QUrl> Urls;
 		Urls urls;
 

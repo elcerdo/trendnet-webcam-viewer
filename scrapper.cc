@@ -6,10 +6,17 @@
 #include <QPainter>
 #include <fstream>
 #include <cmath>
+#include <QMouseEvent>
+
+static const QRect base_rect(0,0,640,480);
+static const QRect status_rect(20,0,640,40);
 
 Scrapper::Scrapper(QWidget* parent)
 	: QWidget(parent)
 {
+	mosaik_size = -1;
+	factor = 1;
+
 	manager = new QNetworkAccessManager(this);
 
 	setMinimumSize(640,480);
@@ -46,7 +53,11 @@ void Scrapper::loadUrlFromFile(const QString& filename)
 void Scrapper::populateWebcams(int number)
 {
 	for (int kk=0; kk<number; kk++)
+	{
 		appendRandomWebcam();
+		if (webcams.size()>=number)
+			return;
+	}
 }
 
 void Scrapper::appendRandomWebcam()
@@ -63,14 +74,46 @@ void Scrapper::appendRandomWebcam()
 	webcams.push_back(webcam);
 }
 
+void Scrapper::mousePressEvent(QMouseEvent* event)
+{
+	if (event->button() != Qt::LeftButton) return;
+	if (mosaik_size<0) return;
+	
+	int ii = floor(event->y()*mosaik_size/(factor*base_rect.height()));
+	if (ii<0) return;
+	if (ii>=mosaik_size) return;
+
+	int jj = floor(event->x()*mosaik_size/(factor*base_rect.width()));
+	if (jj<0) return;
+	if (jj>=mosaik_size) return;
+
+	int index = ii*mosaik_size+jj;
+	if (index>=webcams.size()) return;
+
+	{ // remove webcam
+		Webcam* webcam = webcams[index];
+		qDebug() << webcams[index]->getUrl().toString() << urls.size();
+		webcams.removeAll(webcam);
+		delete webcam;
+	}
+	
+	{ // add a new one
+		if (urls.empty()) return;
+		int selection = qrand() % urls.size();
+		Webcam* webcam = new Webcam(this,manager,urls[selection]);
+		urls.remove(selection);
+		webcams.insert(index,webcam);
+	}
+
+}
+
 void Scrapper::paintEvent(QPaintEvent* event)
 {
-	static const QRect base_rect(0,0,640,480);
-	static const QRect status_rect(10,0,640,40);
 	Q_UNUSED(event);
 
-	int mosaik_size = ceil(sqrt(webcams.size()));
-	float factor = qMin(static_cast<float>(width())/base_rect.width(),static_cast<float>(height())/base_rect.height());
+	mosaik_size = ceil(sqrt(webcams.size()));
+	factor = qMin(static_cast<float>(width())/base_rect.width(),static_cast<float>(height())/base_rect.height());
+
 	QFont font;
 	font.setBold(true);
 	font.setPointSize(30);

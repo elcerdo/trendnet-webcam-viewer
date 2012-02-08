@@ -16,6 +16,7 @@ class Webcam : public QObject
 		QPixmap getLastImage() const;
 		QString getStatus() const;
 		bool isActive();
+		QUrl getUrl() const;
 	signals:
 		void gotImage(const QPixmap& image);
 	protected slots:

@@ -146,6 +146,11 @@ bool Webcam::extractLine(QByteArray& line)
 	return true;
 }
 
+QUrl Webcam::getUrl() const
+{
+	return url;
+}
+
 bool Webcam::isActive()
 {
 	bool local = newImageSinceLastCall;
