@@ -7,6 +7,7 @@ int main(int argc,char * argv[])
 
 	Scrapper scrapper;
 	scrapper.loadUrlFromFile("trendnet_security_cams.txt");
+	scrapper.sendRequest();
 
 	scrapper.show();
 
