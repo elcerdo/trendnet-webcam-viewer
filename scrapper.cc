@@ -15,6 +15,8 @@ Scrapper::Scrapper(QWidget* parent)
 
 	manager = new QNetworkAccessManager(this);
 
+	state = new State(this);
+
 	//sendRequest();
 	//timer->start();
 }
@@ -57,23 +59,7 @@ void Scrapper::readImage()
 	}
 
 	//qDebug() << "read from" << reply->url().toString();
-	buffer.append(reply->readAll());
-	//qDebug() << "buffer" << buffer.size();
-
-	while (true)
-	{
-		int pos = buffer.indexOf("\r\n");
-		if (pos<0) break;
-		qDebug() << "found chunk" << pos;
-
-		QByteArray chunk = buffer.left(pos);
-		buffer.remove(0,pos+2);
-
-		if (chunk.size() < 50)
-			qDebug() << chunk;
-		
-		//qDebug() << chunk;
-	}
+	state->append(reply->readAll());
 }
 
 //void Scrapper::gotReply(QNetworkReply* reply)

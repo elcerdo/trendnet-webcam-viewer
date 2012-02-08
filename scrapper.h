@@ -4,6 +4,7 @@
 #include <QNetworkAccessManager>
 #include <QWidget>
 #include <QTimer>
+#include "state.h"
 
 class Scrapper : public QWidget
 {
@@ -18,8 +19,7 @@ class Scrapper : public QWidget
 		typedef QList<QString> Urls;
 		Urls urls;
 		
-		QByteArray buffer;
-
+		State* state;
 		QTimer* timer;
 		QNetworkAccessManager* manager;
 };
