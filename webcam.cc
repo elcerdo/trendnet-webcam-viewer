@@ -4,8 +4,8 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 
-Webcam::Webcam(QObject* parent, QNetworkAccessManager* manager, const QUrl& url)
-	: QObject(parent), url(url)
+Webcam::Webcam(QObject* parent, QNetworkAccessManager* manager, const QUrl& url, const QString& tag)
+	: QObject(parent), url(url), tag(tag)
 {
 	newImageSinceLastCall = false;
 	indent = "["+url.host()+"]";
@@ -50,7 +50,7 @@ bool Webcam::updateWebcam()
 		QByteArray line;
 		if (!extractLine(line)) return false;
 
-		Q_ASSERT(line.contains("--boundary"));
+		Q_ASSERT(line.contains("--myboundary"));
 		state = GETTYPE;
 		return true;
 	}
@@ -84,7 +84,7 @@ bool Webcam::updateWebcam()
 		QByteArray line;
 		if (!extractLine(line)) return false;
 
-		Q_ASSERT(line.empty());
+		Q_ASSERT(line.isEmpty());
 		state = GETIMAGE;
 		return true;
 	}
@@ -127,7 +127,7 @@ int Webcam::getImageCount() const
 
 QString Webcam::getStatus() const
 {
-	return QString("%1 %2").arg(indent).arg(imageCount);
+	return QString("%1 %3 %2").arg(indent).arg(imageCount).arg(tag);
 }
 
 QPixmap Webcam::getLastImage() const

@@ -11,7 +11,7 @@ class Webcam : public QObject
 {
 	Q_OBJECT
 	public:
-		Webcam(QObject* parent, QNetworkAccessManager* manager, const QUrl& url);
+		Webcam(QObject* parent, QNetworkAccessManager* manager, const QUrl& url, const QString &tag);
 		int getImageCount() const;
 		QPixmap getLastImage() const;
 		QString getStatus() const;
@@ -23,6 +23,7 @@ class Webcam : public QObject
 		void appendChunk();
 	protected:
 		const QUrl url;
+		const QString tag;
 		QString indent;
 		bool newImageSinceLastCall;
 		QNetworkReply* reply;

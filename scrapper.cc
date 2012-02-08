@@ -7,9 +7,10 @@
 #include <fstream>
 #include <cmath>
 #include <QMouseEvent>
+#include "country.h"
 
 static const QRect base_rect(0,0,640,480);
-static const QRect status_rect(20,0,640,40);
+static const QRect status_rect(0,440,640,40);
 
 Scrapper::Scrapper(QWidget* parent)
 	: QWidget(parent)
@@ -62,13 +63,15 @@ void Scrapper::populateWebcams(int number)
 
 void Scrapper::appendRandomWebcam()
 {
+	Country country;
+
 	if (urls.empty()) {
 		qDebug() << "empty urls";
 		return;
 	}
 
 	int selection = qrand() % urls.size();
-	Webcam* webcam = new Webcam(this,manager,urls[selection]);
+	Webcam* webcam = new Webcam(this,manager,urls[selection],country.getCountry(urls[selection]));
 	urls.remove(selection);
 
 	webcams.push_back(webcam);
@@ -98,9 +101,10 @@ void Scrapper::mousePressEvent(QMouseEvent* event)
 	}
 	
 	{ // add a new one
+		Country country;
 		if (urls.empty()) return;
 		int selection = qrand() % urls.size();
-		Webcam* webcam = new Webcam(this,manager,urls[selection]);
+		Webcam* webcam = new Webcam(this,manager,urls[selection],country.getCountry(urls[selection]));
 		urls.remove(selection);
 		webcams.insert(index,webcam);
 	}
