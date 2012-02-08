@@ -1,8 +1,8 @@
-#include "state.h"
+#include "webcam.h"
 
 #include <QDebug>
 
-State::State(QObject* parent)
+Webcam::Webcam(QObject* parent)
 	: QObject(parent)
 {
 	state = INIT;
@@ -12,20 +12,20 @@ State::State(QObject* parent)
 	imageLength = -1;
 }
 
-void State::append(QByteArray chunk)
+void Webcam::append(QByteArray chunk)
 {
 	buffer.append(chunk);
 	//qDebug() << "buffer size" << buffer.size();
 	
-	StateType old_state = state;
-	while (updateState())
+	WebcamType old_state = state;
+	while (updateWebcam())
 	{
 		//qDebug() << old_state << "->" << state;
 		old_state = state;
 	}
 }
 
-bool State::updateState()
+bool Webcam::updateWebcam()
 {
 	if (state == INIT) 
 	{
@@ -100,7 +100,7 @@ bool State::updateState()
 	return false;
 }
 
-bool State::extractLine(QByteArray& line)
+bool Webcam::extractLine(QByteArray& line)
 {
 	int pos = buffer.indexOf("\r\n");
 	if (pos<0) return false;

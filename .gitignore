@@ -1,4 +1,4 @@
 Makefile
 *.o
+webcam
 moc_*.cpp
-trend_cam

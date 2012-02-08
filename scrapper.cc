@@ -16,7 +16,7 @@ Scrapper::Scrapper(QWidget* parent)
 
 	manager = new QNetworkAccessManager(this);
 
-	state = new State(this);
+	state = new Webcam(this);
 	connect(state,SIGNAL(gotImage(const QPixmap&)),SLOT(displayImage(const QPixmap&)));
 
 	//sendRequest();

@@ -4,7 +4,7 @@
 #include <QNetworkAccessManager>
 #include <QWidget>
 #include <QTimer>
-#include "state.h"
+#include "webcam.h"
 
 class Scrapper : public QWidget
 {
@@ -21,7 +21,7 @@ class Scrapper : public QWidget
 		typedef QList<QString> Urls;
 		Urls urls;
 		
-		State* state;
+		Webcam* state;
 		QTimer* timer;
 		QNetworkAccessManager* manager;
 		QPixmap current;
