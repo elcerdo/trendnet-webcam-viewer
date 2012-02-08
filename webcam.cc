@@ -1,26 +1,43 @@
 #include "webcam.h"
 
 #include <QDebug>
+#include <QNetworkReply>
+#include <QNetworkRequest>
 
-Webcam::Webcam(QObject* parent)
-	: QObject(parent)
+Webcam::Webcam(QObject* parent, QNetworkAccessManager* manager, const QUrl& url)
+	: QObject(parent), url(url)
 {
-	state = INIT;
+	indent = "["+url.host()+"]";
+	buffer.clear();
+
 	imageCount = 0;
 	images.clear();
-	buffer.clear();
+
+	state = INIT;
 	imageLength = -1;
+
+	QNetworkRequest request(url);
+	reply = manager->get(request);
+	reply->setParent(this);
+	connect(reply,SIGNAL(readyRead()),SLOT(appendChunk()));
+
+	qDebug() << qPrintable(indent) << "sending request";
 }
 
-void Webcam::append(QByteArray chunk)
+void Webcam::appendChunk()
 {
-	buffer.append(chunk);
-	//qDebug() << "buffer size" << buffer.size();
+	QNetworkReply* reply_casted = dynamic_cast<QNetworkReply*>(sender());
+	if (!reply || !reply_casted || reply_casted!=reply)
+	{
+		qWarning() << qPrintable(indent) << "got wrong reply";
+		return;
+	}
+
+	buffer.append(reply->readAll());
 	
 	WebcamType old_state = state;
 	while (updateWebcam())
 	{
-		//qDebug() << old_state << "->" << state;
 		old_state = state;
 	}
 }
@@ -89,6 +106,7 @@ bool Webcam::updateWebcam()
 
 		imageCount++;
 
+		qDebug() << qPrintable(indent) << "got new image buffer_size =" << images.size();
 		emit gotImage(image);
 
 		state = INIT;
@@ -98,6 +116,22 @@ bool Webcam::updateWebcam()
 	Q_ASSERT(false);
 
 	return false;
+}
+
+int Webcam::getImageCount() const
+{
+	return imageCount;
+}
+
+QString Webcam::getStatus() const
+{
+	return indent+" "+imageCount;
+}
+
+QPixmap Webcam::getLastImage() const
+{
+	if (images.empty()) return QPixmap();
+	return images.back();
 }
 
 bool Webcam::extractLine(QByteArray& line)

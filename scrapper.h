@@ -14,17 +14,16 @@ class Scrapper : public QWidget
 		void loadUrlFromFile(const QString& filename);
 	public slots:
 		void sendRequest();
-		void readImage();
 		void displayImage(const QPixmap& image);
 	protected:
 		void paintEvent(QPaintEvent* event);
-		typedef QList<QString> Urls;
+		typedef QVector<QUrl> Urls;
 		Urls urls;
 		
-		Webcam* state;
-		QTimer* timer;
+		typedef QList<Webcam*> Webcams;
+		Webcams webcams;
+
 		QNetworkAccessManager* manager;
-		QPixmap current;
 };
 
 #endif

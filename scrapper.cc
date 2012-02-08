@@ -5,22 +5,12 @@
 #include <QDebug>
 #include <QPainter>
 #include <fstream>
+#include <cmath>
 
 Scrapper::Scrapper(QWidget* parent)
 	: QWidget(parent)
 {
-	timer = new QTimer(this);
-	timer->setInterval(1000);
-	timer->setSingleShot(false);
-	connect(timer,SIGNAL(timeout()),SLOT(sendRequest()));
-
 	manager = new QNetworkAccessManager(this);
-
-	state = new Webcam(this);
-	connect(state,SIGNAL(gotImage(const QPixmap&)),SLOT(displayImage(const QPixmap&)));
-
-	//sendRequest();
-	//timer->start();
 }
 
 void Scrapper::loadUrlFromFile(const QString& filename)
@@ -30,7 +20,15 @@ void Scrapper::loadUrlFromFile(const QString& filename)
 	{
 		std::string line;
 		handle >> line;
-		urls.push_back(QString(line.c_str()));
+		QUrl url(line.c_str());
+
+		if (!url.isValid())
+		{
+			qDebug() << "invalid url" << url.toString();
+			continue;
+		}
+
+		urls.push_back(url);
 	}
 
 	qDebug() << "found" << urls.size() << "urls";
@@ -43,42 +41,45 @@ void Scrapper::sendRequest()
 		return;
 	}
 
-	QNetworkRequest request(QUrl(urls.back()));
-	urls.pop_back();
+	int selection = qrand() % urls.size();
+	Webcam* webcam = new Webcam(this,manager,urls[selection]);
+	connect(webcam,SIGNAL(gotImage(const QPixmap&)),SLOT(displayImage(const QPixmap&)));
+	urls.remove(selection);
 
-	qDebug() << "requesting" << request.url().toString();
-	QNetworkReply* reply = manager->get(request);
-	connect(reply,SIGNAL(readyRead()),SLOT(readImage()));
-}
-
-void Scrapper::readImage()
-{
-	QNetworkReply* reply = dynamic_cast<QNetworkReply*>(sender());
-	if (!reply)
-	{
-		qDebug() << "got wrong reply";
-		return;
-	}
-
-	//qDebug() << "read from" << reply->url().toString();
-	state->append(reply->readAll());
+	webcams.push_back(webcam);
 }
 
 void Scrapper::displayImage(const QPixmap& image)
 {
-	qDebug() << "got image" << image.size();
-	current = image;
+	Webcam* webcam = dynamic_cast<Webcam*>(sender());
+	Q_ASSERT(webcam);
+	qDebug() << "got image" << image.size() << webcam->getImageCount();
 	update();
 }
 
-//void Scrapper::gotReply(QNetworkReply* reply)
-//{
-//	qDebug() << "got reply" << reply->url().toString();
-//}
-
 void Scrapper::paintEvent(QPaintEvent* event)
 {
+	static const QRect base_rect(0,0,640,480);
+	Q_UNUSED(event);
 	qDebug() << "paint event";
+
+	int mosaik_size = ceil(sqrt(webcams.size()));
 	QPainter painter(this);
-	painter.drawPixmap(rect(),current);
+	painter.scale(1./mosaik_size,1./mosaik_size);
+	Webcams::const_iterator iter = webcams.begin();
+	for (int ii=0; ii<mosaik_size; ii++)
+	{
+		for (int jj=0; jj<mosaik_size; jj++)
+		{
+			if (iter == webcams.end()) return;
+			Webcam* current = *iter;
+			iter++;
+
+			painter.save();
+			painter.translate(jj*base_rect.width(),ii*base_rect.height());
+			painter.drawPixmap(base_rect,current->getLastImage());
+			painter.drawText(0,0,current->getStatus());
+			painter.restore();
+		}
+	}
 }
