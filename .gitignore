@@ -1,4 +1,5 @@
 Makefile
 *.o
 webcam
-moc_*.cpp
+moc_*
+ui_*

@@ -1,4 +1,5 @@
 #include <QApplication>
+#include "mainwindow.h"
 #include "scrapper.h"
 
 int main(int argc,char * argv[])
@@ -7,11 +8,8 @@ int main(int argc,char * argv[])
 
 	QApplication app(argc,argv);
 
-	Scrapper scrapper;
-	scrapper.loadUrlFromFile("trendnet_security_cams.txt");
-	scrapper.populateWebcams(16);
-
-	scrapper.show();
+	MainWindow widget;
+	widget.show();
 
 	return app.exec();
 }

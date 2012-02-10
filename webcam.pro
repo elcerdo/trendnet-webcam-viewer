@@ -1,5 +1,6 @@
 CONFIG += debug
-HEADERS = scrapper.h  webcam.h  country.h
-SOURCES = scrapper.cc webcam.cc country.cc
+FORMS = mainwindow.ui
+HEADERS = scrapper.h  webcam.h  country.h  mainwindow.h
+SOURCES = scrapper.cc webcam.cc country.cc mainwindow.cc
 SOURCES += main.cc
 QT += network
