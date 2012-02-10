@@ -50,7 +50,12 @@ bool Webcam::updateWebcam()
 		QByteArray line;
 		if (!extractLine(line)) return false;
 
-		Q_ASSERT(line.contains("bound"));
+		if (!line.contains("bound")) {
+			state = ERROR;
+			return true;
+		}
+
+		Q_ASSERT(line.contains("bound")); // fails some time
 		state = GETTYPE;
 		return true;
 	}
@@ -115,8 +120,11 @@ bool Webcam::updateWebcam()
 		return true;
 	}
 
-	Q_ASSERT(false);
+	if (state == ERROR) {
+		return false;
+	}
 
+	Q_ASSERT(false);
 	return false;
 }
 
@@ -127,6 +135,7 @@ int Webcam::getImageCount() const
 
 QString Webcam::getStatus() const
 {
+	if (state == ERROR) return QString("%1 %2 ERROR").arg(indent).arg(tag);
 	return QString("%1 %3 %2").arg(indent).arg(imageCount).arg(tag);
 }
 

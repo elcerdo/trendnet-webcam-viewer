@@ -148,6 +148,7 @@ void Scrapper::paintEvent(QPaintEvent* event)
 	font.setPointSize(30);
 
 	QPainter painter(this);
+	painter.fillRect(rect(),Qt::black);
 	painter.setFont(font);
 
 	if (selected_webcam<0) // mozaic mode
