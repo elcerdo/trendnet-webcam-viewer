@@ -13,53 +13,11 @@ struct Record
 	QString name;
 };
 
-typedef QVector<Record> Records;
-static Records records;
-
-typedef QVector<QByteArray> Items;
+#include "ip_to_country.cc" // generated with parse_ip_to_country.py
 
 Country::Country(QObject* parent)
 	: QObject(parent)
 {
-	if (!records.empty()) return;
-
-	int kk = 0;
-	QFile handle("ip-to-country.csv");
-	if (!handle.open(QIODevice::ReadOnly | QIODevice::Text))
-		return;
-
-	unsigned long int old_to = 0;
-	while (!handle.atEnd())
-	{
-		QByteArray line = handle.readLine();
-		Items items = line.split(',').toVector();
-		bool ok;
-
-		ok = false;
-		unsigned long int from = items[0].replace("\"","").toLong(&ok);
-		Q_ASSERT(ok);
-
-		ok = false;
-		unsigned long int to = items[1].replace("\"","").toLong(&ok);
-		Q_ASSERT(ok);
-
-
-		if (old_to>0) { Q_ASSERT(from>old_to); }
-		old_to = to;
-		Q_ASSERT(to>=from);
-
-		Record record;
-		record.from = from;
-		record.to = to;
-		record.name = items[3].replace("\"","");
-
-		records.push_back(record);
-		
-		kk++;
-	}
-
-	qDebug() << kk << "country records";
-
 }
 
 QString dichotomy(unsigned long int addr, unsigned long int left, unsigned long int right)
@@ -95,8 +53,8 @@ QString Country::getCountry(const QUrl& url)
 	int ret = inet_aton(qPrintable(url.host()),&address);
 	Q_ASSERT(ret);
 
-	Q_ASSERT(!records.empty());
-	return dichotomy(address.s_addr,0,records.size()-1);
+	Q_ASSERT(recordsSize);
+	return dichotomy(address.s_addr,0,recordsSize-1);
 	//return brute(address.s_addr);
 }
 

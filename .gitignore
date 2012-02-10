@@ -3,3 +3,4 @@ Makefile
 webcam
 moc_*
 ui_*
+ip_to_country.cc
