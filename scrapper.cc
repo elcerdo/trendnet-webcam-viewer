@@ -4,9 +4,9 @@
 #include <QNetworkReply>
 #include <QDebug>
 #include <QPainter>
-#include <fstream>
-#include <cmath>
 #include <QMouseEvent>
+#include <QFile>
+#include <cmath>
 #include "country.h"
 
 static const QRect base_rect(0,0,640,480);
@@ -31,14 +31,16 @@ Scrapper::Scrapper(QWidget* parent)
 	timer->start();
 }
 
-void Scrapper::loadUrlFromFile(const QString& filename)
+void Scrapper::loadUrlsList(const QString& filename)
 {
-	std::ifstream handle(qPrintable(filename));
-	while (handle && !handle.eof())
+	QFile handle(filename);
+	if (!handle.open(QIODevice::ReadOnly | QIODevice::Text))
+		return;
+
+	int kk = 0;
+	while (!handle.atEnd())
 	{
-		std::string line;
-		handle >> line;
-		QUrl url(line.c_str());
+		QUrl url(handle.readLine());
 
 		if (!url.isValid())
 		{
@@ -47,19 +49,22 @@ void Scrapper::loadUrlFromFile(const QString& filename)
 		}
 
 		urls.push_back(url);
+		kk++;
 	}
 
-	qDebug() << "found" << urls.size() << "urls";
+	qDebug() << "found" << kk << "urls (total" << urls.size() << "urls)";
+	emit urlsCountChanged(urls.size());
 }
 
 void Scrapper::populateWebcams(int number)
 {
 	for (int kk=0; kk<number; kk++)
 	{
-		appendRandomWebcam();
 		if (webcams.size()>=number)
 			return;
+		appendRandomWebcam();
 	}
+	emit urlsCountChanged(urls.size());
 }
 
 void Scrapper::appendRandomWebcam()
@@ -114,6 +119,7 @@ void Scrapper::mousePressEvent(QMouseEvent* event)
 			webcams.insert(index,webcam);
 		}
 
+		emit urlsCountChanged(urls.size());
 		update();
 		return;
 	}

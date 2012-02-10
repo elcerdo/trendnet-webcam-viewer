@@ -11,8 +11,10 @@ class Scrapper : public QWidget
 	Q_OBJECT
 	public:
 		Scrapper(QWidget* parent = NULL);
-		void loadUrlFromFile(const QString& filename);
+		void loadUrlsList(const QString& filename);
 		void populateWebcams(int number);
+	signals:
+		void urlsCountChanged(int);
 	protected:
 		void appendRandomWebcam();
 		void paintEvent(QPaintEvent* event);
