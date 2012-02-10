@@ -40,7 +40,7 @@ void Scrapper::loadUrlsList(const QString& filename)
 	int kk = 0;
 	while (!handle.atEnd())
 	{
-		QUrl url(handle.readLine());
+		QUrl url(handle.readLine().replace("\n",""));
 
 		if (!url.isValid())
 		{
