@@ -50,7 +50,7 @@ bool Webcam::updateWebcam()
 		QByteArray line;
 		if (!extractLine(line)) return false;
 
-		Q_ASSERT(line.contains("--myboundary"));
+		Q_ASSERT(line.contains("bound"));
 		state = GETTYPE;
 		return true;
 	}

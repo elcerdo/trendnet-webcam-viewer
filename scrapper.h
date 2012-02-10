@@ -23,8 +23,9 @@ class Scrapper : public QWidget
 		typedef QVector<QUrl> Urls;
 		Urls urls;
 
-		typedef QList<Webcam*> Webcams;
+		typedef QVector<Webcam*> Webcams;
 		Webcams webcams;
+		int selected_webcam;
 
 		QNetworkAccessManager* manager;
 };

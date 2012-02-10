@@ -10,11 +10,12 @@
 #include "country.h"
 
 static const QRect base_rect(0,0,640,480);
-static const QRect status_rect(0,440,640,40);
+static const QRect status_rect(0,435,640,45);
 
 Scrapper::Scrapper(QWidget* parent)
 	: QWidget(parent)
 {
+	selected_webcam = -1;
 	mosaik_size = -1;
 	factor = 1;
 
@@ -41,7 +42,7 @@ void Scrapper::loadUrlFromFile(const QString& filename)
 
 		if (!url.isValid())
 		{
-			qDebug() << "invalid url" << url.toString();
+			qWarning() << "invalid url" << url.toString();
 			continue;
 		}
 
@@ -66,7 +67,7 @@ void Scrapper::appendRandomWebcam()
 	Country country;
 
 	if (urls.empty()) {
-		qDebug() << "empty urls";
+		qWarning() << "empty urls";
 		return;
 	}
 
@@ -74,41 +75,59 @@ void Scrapper::appendRandomWebcam()
 	Webcam* webcam = new Webcam(this,manager,urls[selection],country.getCountry(urls[selection]));
 	urls.remove(selection);
 
+	selected_webcam = -1;
+	mosaik_size = -1;
+	factor = 1;
 	webcams.push_back(webcam);
 }
 
 void Scrapper::mousePressEvent(QMouseEvent* event)
 {
-	if (event->button() != Qt::LeftButton) return;
 	if (mosaik_size<0) return;
 	
-	int ii = floor(event->y()*mosaik_size/(factor*base_rect.height()));
+	const int ii = floor(event->y()*mosaik_size/(factor*base_rect.height()));
 	if (ii<0) return;
 	if (ii>=mosaik_size) return;
 
-	int jj = floor(event->x()*mosaik_size/(factor*base_rect.width()));
+	const int jj = floor(event->x()*mosaik_size/(factor*base_rect.width()));
 	if (jj<0) return;
 	if (jj>=mosaik_size) return;
 
-	int index = ii*mosaik_size+jj;
+	const int index = ii*mosaik_size+jj;
 	if (index>=webcams.size()) return;
 
-	{ // remove webcam
-		Webcam* webcam = webcams[index];
-		qDebug() << webcams[index]->getUrl().toString() << urls.size();
-		webcams.removeAll(webcam);
-		delete webcam;
-	}
-	
-	{ // add a new one
-		Country country;
-		if (urls.empty()) return;
-		int selection = qrand() % urls.size();
-		Webcam* webcam = new Webcam(this,manager,urls[selection],country.getCountry(urls[selection]));
-		urls.remove(selection);
-		webcams.insert(index,webcam);
+	if (event->button() == Qt::LeftButton && selected_webcam<0) { // left click rotate camera
+		{ // remove webcam
+			Webcam* webcam = webcams[index];
+			webcams.remove(index);
+			delete webcam;
+		}
+
+		qDebug() << "adding another cam" << urls.size() << "left";
+		
+		{ // add a new one
+			Country country;
+			if (urls.empty()) return;
+			int selection = qrand() % urls.size();
+			Webcam* webcam = new Webcam(this,manager,urls[selection],country.getCountry(urls[selection]));
+			urls.remove(selection);
+			webcams.insert(index,webcam);
+		}
+
+		update();
+		return;
 	}
 
+	if (event->button() == Qt::RightButton) { // right click switch to full screen
+		if (selected_webcam<0)
+		{
+			selected_webcam = index;
+			qDebug() << "switching to fullscreen mode for" << webcams[selected_webcam]->getUrl().host();
+		} else {
+			qDebug() << "switching to mozaic";
+			selected_webcam = -1;
+		}
+	}
 }
 
 void Scrapper::paintEvent(QPaintEvent* event)
@@ -124,23 +143,38 @@ void Scrapper::paintEvent(QPaintEvent* event)
 
 	QPainter painter(this);
 	painter.setFont(font);
-	painter.scale(factor/mosaik_size,factor/mosaik_size);
-	Webcams::const_iterator iter = webcams.begin();
-	for (int ii=0; ii<mosaik_size; ii++)
-	{
-		for (int jj=0; jj<mosaik_size; jj++)
-		{
-			if (iter == webcams.end()) return;
-			Webcam* current = *iter;
-			iter++;
 
-			painter.save();
-			painter.translate(jj*base_rect.width(),ii*base_rect.height());
-			painter.drawPixmap(base_rect,current->getLastImage());
-			painter.setPen(Qt::red);
-			if (current->isActive()) painter.setPen(Qt::green);
-			painter.drawText(status_rect,current->getStatus());
-			painter.restore();
+	if (selected_webcam<0) // mozaic mode
+	{
+		painter.scale(factor/mosaik_size,factor/mosaik_size);
+		Webcams::const_iterator iter = webcams.begin();
+		for (int ii=0; ii<mosaik_size; ii++)
+		{
+			for (int jj=0; jj<mosaik_size; jj++)
+			{
+				if (iter == webcams.end()) return;
+				Webcam* current = *iter;
+				iter++;
+
+				painter.save();
+				painter.translate(jj*base_rect.width(),ii*base_rect.height());
+				painter.drawPixmap(base_rect,current->getLastImage());
+				painter.setPen(Qt::red);
+				if (current->isActive()) painter.setPen(Qt::green);
+				painter.drawText(status_rect,current->getStatus());
+				painter.restore();
+			}
 		}
+	} else { //zoom mode
+		Q_ASSERT(selected_webcam<webcams.size());
+
+		Webcam* current = webcams[selected_webcam];
+
+		painter.scale(factor,factor);
+		painter.drawPixmap(base_rect,current->getLastImage());
+		painter.setPen(Qt::red);
+		if (current->isActive()) painter.setPen(Qt::green);
+		painter.drawText(status_rect,current->getStatus());
 	}
+
 }
