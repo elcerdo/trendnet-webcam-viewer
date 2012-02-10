@@ -65,10 +65,10 @@ Country::Country(QObject* parent)
 QString dichotomy(unsigned long int addr, unsigned long int left, unsigned long int right)
 {
 	unsigned long int middle = (left+right)/2;
-	qDebug() << addr << left << right << middle;
-	qDebug() << "left" << records[left].from << records[left].to;
-	qDebug() << "right" << records[right].from << records[right].to;
-	qDebug() << "middle" << records[middle].from << records[middle].to;
+	//qDebug() << addr << left << right << middle;
+	//qDebug() << "left" << records[left].from << records[left].to;
+	//qDebug() << "right" << records[right].from << records[right].to;
+	//qDebug() << "middle" << records[middle].from << records[middle].to;
 	if (left>right) return "??";
 	if (addr < records[left].from) return "??";
 	if (addr > records[right].to) return "??";
@@ -81,12 +81,12 @@ QString dichotomy(unsigned long int addr, unsigned long int left, unsigned long 
 	return "??";
 }
 
-QString brute(unsigned long addr)
-{
-	for (Records::const_iterator iter=records.begin(); iter!=records.end(); iter++)
-		if (iter->from <= addr && iter->to >= addr) return iter->name;
-	return "??";
-}
+//QString brute(unsigned long addr)
+//{
+//	for (Records::const_iterator iter=records.begin(); iter!=records.end(); iter++)
+//		if (iter->from <= addr && iter->to >= addr) return iter->name;
+//	return "??";
+//}
 
 
 QString Country::getCountry(const QUrl& url)
@@ -96,7 +96,7 @@ QString Country::getCountry(const QUrl& url)
 	Q_ASSERT(ret);
 
 	Q_ASSERT(!records.empty());
-	//return dichotomy(address.s_addr,0,records.size()-1);
-	return brute(address.s_addr);
+	return dichotomy(address.s_addr,0,records.size()-1);
+	//return brute(address.s_addr);
 }
 
